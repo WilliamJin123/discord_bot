@@ -15,7 +15,7 @@ MEMORY_SIZE = 20  # Remember last 20 messages
 CHUD_ROLE_NAME = "Certified Chud"
 CHUD_THREAD_NAME = "fat-chud-area"
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-DB_FILE = "./chud_agent_history"
+DB_FILE = "./chud_agent_history.db"
 
 chud_agent = Agent(
     model=Cerebras("llama-3.3-70b", temperature=1, top_p=0.9 ),
