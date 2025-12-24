@@ -5,7 +5,13 @@ from typing import Dict
 from agno.agent import Agent
 from agno.models.cerebras import Cerebras
 from agno.db.sqlite import SqliteDb
+
 import discord
+from discord import app_commands
+from discord.ext import commands
+
+from services import RedditClient
+
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -47,6 +53,8 @@ class ChudClient(discord.Client):
         self.brain = agent
 
         self.channel_memory: Dict[int, deque] = defaultdict(lambda: deque(maxlen=MEMORY_SIZE))
+        self.reddit = RedditClient()
+
 
     async def on_ready(self):
         print(f"ChudHunter active as {self.user}")
@@ -64,6 +72,9 @@ class ChudClient(discord.Client):
                 target = message.mentions[0]
                 await self.execute_chud_protocol(message, target)
                 return
+        elif message.content.startswith("!GEMALERT"):
+            await self.gem_alert()
+            return
             
         if random.random() < CHUD_THRESHOLD:
             await self.execute_chud_protocol(message, message.author)
@@ -130,6 +141,16 @@ class ChudClient(discord.Client):
             print("Permission Error: Bot role is likely too low in the hierarchy or missing 'Manage Roles'.")
         except Exception as e:
             print(f"An error occurred: {e}")
+
+    async def gem_alert(self):
+        """Get a gem from reddit"""
+        gem = await self.reddit.get_gem_async()
+        if gem:
+            channel = discord.utils.get(self.get_all_channels(), name="general")
+            if channel:
+                embed = discord.Embed(title="💎 GEM ALERT 💎", description=gem.title)
+                embed.set_image(url=gem.image_url)
+                await channel.send(embed=embed)
 
 if __name__ == "__main__":
     intents = discord.Intents.default()
