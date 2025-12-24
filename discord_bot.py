@@ -71,7 +71,7 @@ class ChudClient(discord.Client):
                 await self.execute_chud_protocol(message, target)
                 return
         elif message.content.startswith("!gemalert"):
-            await self.gem_alert()
+            await self.gem_alert(message)
             return
             
         if random.random() < CHUD_THRESHOLD:
@@ -140,15 +140,13 @@ class ChudClient(discord.Client):
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    async def gem_alert(self):
+    async def gem_alert(self, message: discord.Message):
         """Get a gem from reddit"""
         gem = await self.reddit.get_gem_async()
         if gem:
-            channel = discord.utils.get(self.get_all_channels(), name="general")
-            if channel:
-                embed = discord.Embed(title="💎 GEM ALERT 💎", description=gem.title)
-                embed.set_image(url=gem.image_url)
-                await channel.send(embed=embed)
+            embed = discord.Embed(title="💎 GEM ALERT 💎", description=gem.title)
+            embed.set_image(url=gem.image_url)
+            await message.channel.send(embed=embed)
 
 if __name__ == "__main__":
     intents = discord.Intents.default()
