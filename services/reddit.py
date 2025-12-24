@@ -43,7 +43,7 @@ class RedditClient:
         subreddit: str = "kitchencels",
         sort: str = "top",
         t: str = "week",
-        limit: int = 10,
+        limit: int = 25,
     ) -> List[Dict[str, Any]]:
         """Return top posts of the week for a subreddit."""
         params: Dict[str, Any] = {
