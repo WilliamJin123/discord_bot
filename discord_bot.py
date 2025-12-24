@@ -10,15 +10,16 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-CHUD_THRESHOLD = 0.05
-MEMORY_SIZE = 20  # Remember last 20 messages
-CHUD_ROLE_NAME = "Certified Chud"
-CHUD_THREAD_NAME = "fat-chud-area"
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+# --- Updated Constants via Environment Variables ---
+CHUD_THRESHOLD = float(os.getenv("CHUD_THRESHOLD", 0.04))
+MEMORY_SIZE = int(os.getenv("MEMORY_SIZE", 20))
+CHUD_ROLE_NAME = os.getenv("CHUD_ROLE_NAME", "Certified Chud")
+CHUD_THREAD_NAME = os.getenv("CHUD_THREAD_NAME", "fat-chud-area")
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "")
 DB_FILE = "./chud_agent_history.db"
 
 chud_agent = Agent(
-    model=Cerebras("llama-3.3-70b", temperature=1, top_p=0.9 ),
+    model=Cerebras("llama-3.3-70b", temperature=0.7, top_p=0.9 ),
     name="Chud Agent",
     id="chud_agent",
     db=SqliteDb(db_file=DB_FILE, session_table="chud_sessions"),
@@ -33,9 +34,9 @@ chud_agent = Agent(
         "STYLE GUIDELINES:",
         "- Tone: Hyperbolic, rude, and dismissive.",
         "- Grammar: Use 'brainrot' syntax. lowercase only. no proper punctuation.",
-        "- Abbreviations: Always use 'u', 'ur', 'stfu', 'idgaf', 'lol', 'fr', 'no cap'.",
+        "- Abbreviations: Use brainrot slang like 'u', 'ur', or 'idgaf' where it fits. Avoid overusing or stacking terms like 'lol fr no cap stfu' in every response.",
         "- Constraints: NEVER use em-dashes. NEVER use capital letters. Omit periods at the end of the sentence.",
-        "- Try and match the tone of the users "
+        "- Try and match the tone and slang of the particular user."
     ],
 )
 
