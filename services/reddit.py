@@ -12,7 +12,8 @@ class Gem(BaseModel):
 
 class RedditClient:
     def __init__(self, base_url: str = "https://www.reddit.com", timeout: int = 10) -> None:
-        self.base_url = base_url.rstrip("/")
+        env_base_url = os.getenv("REDDIT_BASE_URL")
+        self.base_url = (env_base_url or base_url).rstrip("/")
         self.user_agent = os.getenv("REDDIT_USER_AGENT", "desktop:chudbot:1.x (by /u/Next-Average656)")
         self.timeout = timeout
 
@@ -29,15 +30,34 @@ class RedditClient:
         clean_path = path if path.startswith("/") else f"/{path}"
         if not clean_path.endswith(".json"):
             clean_path = f"{clean_path}.json"
-        url = f"{self.base_url}{clean_path}"
-        response = requests.get(
-            url,
-            headers=self._headers(),
-            params=params,
-            timeout=self.timeout,
-        )
-        response.raise_for_status()
-        return response.json()
+        base_urls = [self.base_url]
+        if self.base_url != "https://old.reddit.com":
+            base_urls.append("https://old.reddit.com")
+
+        last_error: Optional[Exception] = None
+        for base_url in base_urls:
+            url = f"{base_url}{clean_path}"
+            try:
+                response = requests.get(
+                    url,
+                    headers=self._headers(),
+                    params=params,
+                    timeout=self.timeout,
+                )
+                response.raise_for_status()
+                return response.json()
+            except requests.HTTPError as exc:
+                last_error = exc
+                status = getattr(exc.response, "status_code", None)
+                if status in (403, 429):
+                    continue
+                raise
+            except requests.RequestException as exc:
+                last_error = exc
+                raise
+        if last_error:
+            raise last_error
+        return {}
 
     def get_gems(
         self,
@@ -53,7 +73,10 @@ class RedditClient:
         }
 
         path = f"/r/{subreddit}/{sort}"
-        response = self.get(path, params=params)
+        try:
+            response = self.get(path, params=params)
+        except requests.RequestException:
+            return []
         children = response.get("data", {}).get("children", [])
         gems = []
         for child in children:
@@ -63,14 +86,16 @@ class RedditClient:
             gems.append(gem)
         return gems
     
-    def get_gem(self) -> Gem:
+    def get_gem(self) -> Optional[Gem]:
         gems = self.get_gems()
+        if not gems:
+            return None
         return choice(gems)
 
     async def get_gems_async(self, *args, **kwargs) -> List[Dict[str, Any]]:
         return await asyncio.to_thread(self.get_gems, *args, **kwargs)
 
-    async def get_gem_async(self, *args, **kwargs) -> Gem:
+    async def get_gem_async(self, *args, **kwargs) -> Optional[Gem]:
         return await asyncio.to_thread(self.get_gem, *args, **kwargs)
 
 # testing

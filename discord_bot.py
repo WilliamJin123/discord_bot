@@ -147,6 +147,8 @@ class ChudClient(discord.Client):
             embed = discord.Embed(title="💎 GEM ALERT 💎", description=gem.title)
             embed.set_image(url=gem.image_url)
             await message.channel.send(embed=embed)
+        else:
+            await message.channel.send("Reddit blocked the request or no gems were found.")
 
 if __name__ == "__main__":
     intents = discord.Intents.default()
