@@ -3,6 +3,7 @@ from random import choice
 import asyncio
 import requests
 from pydantic import BaseModel
+import os
 
 class Gem(BaseModel):
     title: str
@@ -12,7 +13,7 @@ class Gem(BaseModel):
 class RedditClient:
     def __init__(self, base_url: str = "https://www.reddit.com", timeout: int = 10) -> None:
         self.base_url = base_url.rstrip("/")
-        self.user_agent = "chudbot/1.0 by u/chudbot"
+        self.user_agent = os.getenv("REDDIT_USER_AGENT", "chudbot/1.x by u/chudbotdevs")
         self.timeout = timeout
 
  
