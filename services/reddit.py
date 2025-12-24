@@ -12,7 +12,7 @@ class Gem(BaseModel):
 class RedditClient:
     def __init__(self, base_url: str = "https://www.reddit.com", timeout: int = 10) -> None:
         self.base_url = base_url.rstrip("/")
-        self.user_agent = "reddit_user_agent"
+        self.user_agent = "chudbot/1.0 by u/chudbot"
         self.timeout = timeout
 
  
