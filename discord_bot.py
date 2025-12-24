@@ -7,10 +7,8 @@ from agno.models.cerebras import Cerebras
 from agno.db.sqlite import SqliteDb
 
 import discord
-from discord import app_commands
-from discord.ext import commands
 
-from services import RedditClient
+from services.reddit import RedditClient
 
 from dotenv import load_dotenv
 
@@ -72,7 +70,7 @@ class ChudClient(discord.Client):
                 target = message.mentions[0]
                 await self.execute_chud_protocol(message, target)
                 return
-        elif message.content.startswith("!GEMALERT"):
+        elif message.content.startswith("!gemalert"):
             await self.gem_alert()
             return
             
